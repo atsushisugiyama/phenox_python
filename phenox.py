@@ -53,7 +53,7 @@ PX_BOTTOM_CAM = 1
 
 #if shared object file moves to an other directory,
 #modify "_shared_object_path"
-_shared_object_path = r"\root\phenox\library\sobjs\pxlib.so"
+_shared_object_path = r"/root/phenox/library/sobjs/pxlib.so"
 pxlib = cdll.LoadLibrary(_shared_object_path)
 
 class PhenoxOperate(Structure):
