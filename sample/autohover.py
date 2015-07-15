@@ -7,18 +7,18 @@ from time import sleep
 
 import phenox as px
 
-camera_id = PX_BOTTOM_CAM
+camera_id = px.PX_BOTTOM_CAM
 timer_interval_ms = 10
 features_max = 200
 
 
-selfstate = px.Selfstate()
+st = px.Selfstate()
 feature_capture_state = 0
 feature_number = 0
 msec_cnt = 0
 
 
-prev_operate_mode = PX_HALT
+prev_operatemode = px.PX_HALT
 timer_enabled = False
 timer_busy = False
 has_serious_trouble = False
@@ -28,6 +28,9 @@ def do_nothing():
     pass
 
 def timer_tick():
+    global feature_capture_state, feature_number, msec_cnt, prev_operatemode
+    global timer_enabled, timer_busy, has_serious_trouble
+    global st
     if not timer_enabled:
         return
 
@@ -39,11 +42,11 @@ def timer_tick():
 
     timer_busy = True
 
-    px.keepalive()
+    px.set_keepalive()
     #what is this??
     px.set_systemlog()
 
-    px.get_selfstate(selfstate)
+    px.get_selfstate(st)
     msec_cnt += 1
     if msec_cnt % 3 == 0:
         print(" | ".join("{:.2f}".format(v) for v in [
@@ -57,7 +60,7 @@ def timer_tick():
             ]))
 
     current_operatemode = px.get_operate_mode()
-    if prev_operatemode == PX_UP and current_operatemode == PX_HOVER:
+    if prev_operatemode == px.PX_UP and current_operatemode == px.PX_HOVER:
         px.set_visioncontrol_xy(st.vision_tx, st.vision_ty)
     prev_operatemode = current_operatemode
 
@@ -66,11 +69,11 @@ def timer_tick():
         #  because this flag turns to False when
         #  return value is True
         #px.reset_whistle_is_detected()
-        if current_operatemode == PX_HOVER:
-            px.set_operate_mode(PX_DOWN)
-        elif current_operatemode == PX_HALT:
+        if current_operatemode == px.PX_HOVER:
+            px.set_operate_mode(px.PX_DOWN)
+        elif current_operatemode == px.PX_HALT:
             px.set_rangecontrol_z(150.0)
-            px.set_operatem_mode(PX_UP)
+            px.set_operatem_mode(px.PX_UP)
 
     if px.get_battery() == 1:
         has_serious_trouble = True
@@ -92,6 +95,8 @@ if __name__ == '__main__':
         
         #main thread processes image feature
         while True:
+            sleep(1)
+        while False: #True:
             if feature_capture_state == 0:
                 if px.get_imgfeature_query(camera_id) == 1:
                     feature_capture_state = 1
@@ -102,6 +107,8 @@ if __name__ == '__main__':
                     feature_capture_state = 0
             sleep(1)
 
+    except Exception as error:
+        print(error)
     #what kind of error will be occur? 
     # -> the most likely one is KeyboardInterrupt.
 
@@ -110,8 +117,8 @@ if __name__ == '__main__':
     #"close_chain" -> Garbage Collection -> Segmentation Fault)
     finally:
         timer_enabled = False
-        px.set_operate_mode(PX_HALT)
-        px.close_chain()
+        px.set_operate_mode(px.PX_HALT)
+        #px.close_chain()
         if has_serious_trouble:
             os.system("umount /mnt\n")
             os.system("shutdown -h now\n")
