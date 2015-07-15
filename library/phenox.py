@@ -293,7 +293,7 @@ def set_visioncontrol_xy(tx, ty):
     tx and ty must be float value.
     """
     if isinstance(tx, float) and isinstance(ty, float):
-        pxlib.pxset_visioncontrol_xy(tx, ty)
+        pxlib.pxset_visioncontrol_xy(c_float(tx), c_float(ty))
     else:
         raise TypeError("pxset_visioncontrol_xy only accepts 'float', 'float'")
 
@@ -302,8 +302,8 @@ def set_rangecontrol_z(tz):
 
     tz must be float value.
     """
-    if isinstance(tz, float):
-        pxlib.pxset_rangecontrol_z(tz)
+    if isinstance(tz, float) or isinstance(tz, int):
+        pxlib.pxset_rangecontrol_z(c_float(tz))
     else:
         raise TypeError("pxset_rangecontrol_z only accepts 'float'")
 
@@ -313,7 +313,7 @@ def set_dst_degx(val):
     angle must be float value written by degree-unit manner.
     """
     if isinstance(val, float):
-        pxlib.pxset_dst_degx(val)
+        pxlib.pxset_dst_degx(c_float(val))
     else:
         raise TypeError("pxset_dst_pitch only accepts 'float'")
 
@@ -323,7 +323,7 @@ def set_dst_degy(val):
     angle must be float value written by degree-unit manner.
     """
     if isinstance(val, float):
-        pxlib.pxset_dst_degy(val)
+        pxlib.pxset_dst_degy(c_float(val))
     else:
         raise TypeError("pxset_dst_roll only accepts 'float'")
 
@@ -333,13 +333,13 @@ def set_dst_degz(val):
     angle must be float value written by degree-unit manner.
     """
     if isinstance(val, float):
-        pxlib.pxset_dst_degz(val)
+        pxlib.pxset_dst_degz(c_float(val))
     else:
         raise TypeError("pxset_dst_yaw only accepts 'float'")
 
 def set_visualselfposition(tx, ty):
     if isinstance(tx, float) and isinstance(ty, float):
-        return pxlib.pxset_visualselfposition(tx, ty)
+        return pxlib.pxset_visualselfposition(c_float(tx), c_float(ty))
     else:
         raise TypeError(
             "pxset_visualselfposition only accepts 'float, float, float'"
@@ -400,12 +400,12 @@ def set_blobmark_query(cameraId, min_y, max_y, min_u, max_u, min_v, max_v):
         ):
         return pxlib.pxset_blobmark(
             cameraId, 
-            min_y, 
-            max_y, 
-            min_u,
-            max_u,
-            min_v,
-            max_v
+            c_float(min_y),
+            c_float(max_y),
+            c_float(min_u),
+            c_float(max_u),
+            c_float(min_v),
+            c_float(max_v)
         )
     else:
         raise TypeError("set_blobmark_query received incorrect type arguments.")
@@ -414,7 +414,7 @@ def get_blobmark():
     """get blob mark"""
     x, y, size = c_float(), c_float(), c_float()
     pxlib.pxget_blobmark(byref(x), byref(y), byref(size))
-    return (x, y, size)
+    return (x.value, y.value, size.value)
 
 #4. sound processing
 def get_whistle_is_detected():
@@ -435,7 +435,7 @@ def set_sound_recordquery(recordtime):
     record time is in the range of (0, 50.0]
     """
     if isinstance(recordtime, float):
-        return pxlib.pxset_sound_recordquery(recordtime)
+        return pxlib.pxset_sound_recordquery(c_float(recordtime))
     else:
         raise TypeError("set_sound_recordquery only accepts 'float'")
 
@@ -454,7 +454,7 @@ def get_sound(recordtime):
     if isinstance(recordtime, float):
         size = int(recordtime * 10000)
         buffer = (c_short * size)()
-        result = pxlib.pxget_sound(buffer, recordtime)
+        result = pxlib.pxget_sound(buffer, c_float(recordtime))
         if result == 1:
             return (result, buffer)
         else:

@@ -5,6 +5,8 @@ import os
 from threading import Timer
 from time import sleep
 
+from ctypes import c_float
+
 import phenox as px
 
 camera_id = px.PX_BOTTOM_CAM
