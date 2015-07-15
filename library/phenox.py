@@ -472,7 +472,9 @@ def set_led(led, state):
     led(0 or 1) indicates which LED light to set
     state(0:OFF or 1:ON) indicates LED state
     """
-    if isinstance(led, int) and isinstance(state, int):
+    if isinstance(led, int) and isinstance(state, bool):
+        pxlib.pxset_led(led, int(state))
+    elif isinstance(led, int) and isinstance(state, int):
         pxlib.pxset_led(led, state)
     else:
         raise TypeError("set_led only accepts 'int, int'")
@@ -484,7 +486,9 @@ def set_buzzer(state):
     by selecting 0, buzzer turns off,
     by selecting 1, buzzer turns on.
     """
-    if isinstance(state, int):
+    if isinstance(state, bool):
+        pxlib.pxset_buzzer(int(state))
+    elif isinstance(state, int):
         pxlib.pxset_buzzer(state)
     else:
         raise TypeError("set_buzzer only accepts 'int'")
