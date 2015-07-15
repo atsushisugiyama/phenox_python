@@ -309,12 +309,12 @@ def set_rangecontrol_z(tz):
     else:
         raise TypeError("pxset_rangecontrol_z only accepts 'float'")
 
-def set_dst_degx(val) or isinstance(val, int):
+def set_dst_degx(val):
     """set destination pitch angle
 
     angle must be float value written by degree-unit manner.
     """
-    if isinstance(val, float):
+    if isinstance(val, float) or isinstance(val, int):
         pxlib.pxset_dst_degx(c_float(val))
     else:
         raise TypeError("pxset_dst_pitch only accepts 'float'")
