@@ -292,7 +292,9 @@ def set_visioncontrol_xy(tx, ty):
 
     tx and ty must be float value.
     """
-    if isinstance(tx, float) and isinstance(ty, float):
+    if ((isinstance(tx, float) or isinstance(tx, int)) and 
+        (isinstance(ty, float) or isinstance(ty, int))
+        ):
         pxlib.pxset_visioncontrol_xy(c_float(tx), c_float(ty))
     else:
         raise TypeError("pxset_visioncontrol_xy only accepts 'float', 'float'")
@@ -307,7 +309,7 @@ def set_rangecontrol_z(tz):
     else:
         raise TypeError("pxset_rangecontrol_z only accepts 'float'")
 
-def set_dst_degx(val):
+def set_dst_degx(val) or isinstance(val, int):
     """set destination pitch angle
 
     angle must be float value written by degree-unit manner.
@@ -322,7 +324,7 @@ def set_dst_degy(val):
 
     angle must be float value written by degree-unit manner.
     """
-    if isinstance(val, float):
+    if isinstance(val, float) or isinstance(val, int):
         pxlib.pxset_dst_degy(c_float(val))
     else:
         raise TypeError("pxset_dst_roll only accepts 'float'")
@@ -332,7 +334,7 @@ def set_dst_degz(val):
 
     angle must be float value written by degree-unit manner.
     """
-    if isinstance(val, float):
+    if isinstance(val, float) or isinstance(val, int):
         pxlib.pxset_dst_degz(c_float(val))
     else:
         raise TypeError("pxset_dst_yaw only accepts 'float'")
