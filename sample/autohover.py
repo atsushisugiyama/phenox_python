@@ -75,7 +75,7 @@ def timer_tick():
             px.set_operate_mode(px.PX_DOWN)
         elif current_operatemode == px.PX_HALT:
             px.set_rangecontrol_z(150.0)
-            px.set_operatem_mode(px.PX_UP)
+            px.set_operate_mode(px.PX_UP)
 
     if px.get_battery() == 1:
         has_serious_trouble = True
@@ -96,7 +96,7 @@ if __name__ == '__main__':
         timer_tick()
         
         #main thread processes image feature
-        while True:
+        while timer_enabled:
             sleep(1)
         while False: #True:
             if feature_capture_state == 0:
