@@ -6,16 +6,14 @@ This is a thin lapper code of shared object(dynamic link) library
 'pxlib.so'. Therefore, if you modified base library code 'pxlib.c' 
 and rebuild it with '-shared' option, this module will be affected.
 
-when you operate Phenox by Python, your code must be started with
+for the safety and usability, this module executes
 
-"phenox.init_chain()"
+init_chain()
+while not get_cpu1ready():
+    pass
 
-before using other phenox functions. 
-Similarly, your code have to call
-
-"phenox.close_chain()"
-
-before ending process (even when some error occurred).
+when loaded for the first time in the program.
+it might take a few second to complete the process above.
 
 in this module the unit is uniformed as follows:
 
@@ -205,7 +203,7 @@ def get_cpu1ready():
 #I could not get what this module is(2015.May.11)
 def get_motorstatus():
     """get the status of motors"""
-    return pxlib.pxget_motorstatus()
+    return bool(pxlib.pxget_motorstatus())
 
 def set_pconfig(param):
     """set pconfig defined by user
@@ -415,8 +413,8 @@ def set_blobmark_query(cameraId, min_y, max_y, min_u, max_u, min_v, max_v):
 def get_blobmark():
     """get blob mark"""
     x, y, size = c_float(), c_float(), c_float()
-    pxlib.pxget_blobmark(byref(x), byref(y), byref(size))
-    return (x.value, y.value, size.value)
+    result = pxlib.pxget_blobmark(byref(x), byref(y), byref(size))
+    return (result, x.value, y.value, size.value)
 
 #4. sound processing
 def get_whistle_is_detected():
@@ -498,5 +496,17 @@ def get_battery():
 
     '1' indicates abnormal state???
     """
-    return pxlib.pxget_battery()
+    return bool(pxlib.pxget_battery())
+
+
+
+
+#excecuted when loaded for the first time in the program
+print("phenox module: CPU0 Start Initialization. Please do not move Phenox")
+init_chain()
+while not get_cpu1ready():
+    pass
+
+print("phenox module: CPU0 Finished Initialization")
+
 

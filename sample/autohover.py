@@ -84,12 +84,6 @@ def timer_tick():
     timer_busy = False
 
 if __name__ == '__main__':
-    px.init_chain()
-    print("CPU0:Start Initialization. Please do not move Phenox")
-    while not px.get_cpu1ready():
-        pass
-    print("CPU0:Finished Initialization")
-
     try:
         #You may insert your own code in this try statement
         timer_enabled = True
