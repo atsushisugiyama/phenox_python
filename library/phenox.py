@@ -24,6 +24,8 @@ angle: degree
 
 from ctypes import *
 
+import ipl_to_ndarray
+
 """
 consts below are defined in C by this code.
 
@@ -348,8 +350,9 @@ def set_visualselfposition(tx, ty):
 #3. Image processing
 #3-a. raw image 
 def get_imgfullwcheck(cameraId, img):
-    #this function arguement is "IplImage" so implementation is hard..
-    return None
+    img_ptr = POINTER(ipl_to_ndarray.IplImage)()
+    result = pxlib.pxget_imgfullwcheck(cameraId, byref(img_ptr))
+    return result, img_ptr
 
 def set_img_seq(cameraId):
     if isinstance(cameraId, int):
