@@ -79,6 +79,7 @@ def ipl_to_ndarray(ipl_ptr, img_shape):
     str_data = string_at(iplimage.imageData, iplimage.imageSize)
     cv2.cv.SetData(cv_img, str_data, iplimage.widthStep)
 
-    # building a CvMat image by slice([:,:]), and build ndarray from CvMat
+    # building a CvMat image by slice operation([:,:]), 
+    # and build ndarray from CvMat
     return asarray(cv_img[:, :])
 

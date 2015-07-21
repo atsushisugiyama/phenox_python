@@ -51,6 +51,9 @@ PX_DOWN = 3
 PX_FRONT_CAM = 0
 PX_BOTTOM_CAM = 1
 
+#Camera data's shape in numpy.ndarray
+PX_CAM_DATA_SHAPE = (240, 320, 3)
+
 #if shared object file moves to an other directory,
 #modify "_shared_object_path"
 _shared_object_path = r"/root/phenox/library/sobjs/pxlib.so"
@@ -259,6 +262,9 @@ def get_selfstate(state=None):
         raise TypeError("pxget_selfstate only accepts 'selfstate'")
 
 def set_keepalive():
+    """ publish the signal which indicates user code is running 
+    in user program, this function has to be called periodically
+    """
     pxlib.pxset_keepalive()
 
 
@@ -349,10 +355,15 @@ def set_visualselfposition(tx, ty):
 
 #3. Image processing
 #3-a. raw image 
-def get_imgfullwcheck(cameraId, img):
+def get_imgfullwcheck(cameraId):
     img_ptr = POINTER(ipl_to_ndarray.IplImage)()
     result = pxlib.pxget_imgfullwcheck(cameraId, byref(img_ptr))
-    return result, img_ptr
+    if result == None:
+        return result, None
+    else:
+        #height, width, n_channel
+        img_shape = PX_CAM_DATA_SHAPE
+        img = ipl_to_ndarray.ipl_to_ndarray(img_ptr, shape)
 
 def set_img_seq(cameraId):
     if isinstance(cameraId, int):
@@ -459,7 +470,7 @@ def get_sound(recordtime):
         buffer = (c_short * size)()
         result = pxlib.pxget_sound(buffer, c_float(recordtime))
         if result == 1:
-            return (result, buffer)
+            return (result, list(buffer))
         else:
             return (result, [])
     else:
