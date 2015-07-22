@@ -56,7 +56,7 @@ IplImage._fields_ = [
     ("tileInfo", POINTER(IplTileInfo)),
     ("imageSize", c_int),
     #be careful to use c_void_p!!
-    #When making ndarray2IplImage function, memory allocate is required.
+    #When making python type 2 IplImage* function, memory allocate is required
     ("imageData", c_void_p), 
     ("widthStep", c_int),
     ("BorderMode", c_int * 4),
@@ -64,13 +64,12 @@ IplImage._fields_ = [
     ("imageDataOrigin", c_char_p)
     ]
 
-def ipl_to_ndarray(ipl_ptr, img_shape):
-    """get ndarray representing image from IplImage*
+def ipl2iplimage(ipl_ptr, img_shape):
+    """get cv2.cv.iplimage from C's IplImage*
 
     ipl_ptr: POINTER(IplImage) that points to valid image
     img_shape: 3 element int tuple (height, width, n_channels)
     """
-
     #allocate Python memory for image
     height, width, n_channels = img_shape
     cv_img = cv2.cv.CreateImageHeader((width, height), IPL_DEPTH_8U, n_channels)
@@ -78,7 +77,25 @@ def ipl_to_ndarray(ipl_ptr, img_shape):
     iplimage = ipl_ptr.contents
     str_data = string_at(iplimage.imageData, iplimage.imageSize)
     cv2.cv.SetData(cv_img, str_data, iplimage.widthStep)
+    return cv_img
 
+def ipl2cvmat(ipl_ptr, img_shape):
+    """get cv2.cv.cvmat from C's IplImage*
+
+    ipl_ptr: POINTER(IplImage) that points to valid image
+    img_shape: 3 element int tuple (height, width, n_channels)
+    """
+    cv_img = ipl2iplimage(ipl_ptr, img_shape)
+    # building a CvMat image by slice operation([:,:])
+    return cv_img[:, :]
+
+def ipl2array(ipl_ptr, img_shape):
+    """get numpy.ndarray from IplImage*
+
+    ipl_ptr: POINTER(IplImage) that points to valid image
+    img_shape: 3 element int tuple (height, width, n_channels)
+    """
+    cv_img = ipl2iplimage(ipl_ptr, img_shape)
     # building a CvMat image by slice operation([:,:]), 
     # and build ndarray from CvMat
     return asarray(cv_img[:, :])

@@ -2,50 +2,40 @@
 # -*- coding: utf-8 -*-
 
 import os
+import time
 from threading import Timer
-from time import sleep
-
-from ctypes import c_float
 
 import phenox as px
 
+#const values
 camera_id = px.PX_BOTTOM_CAM
 timer_interval_ms = 10
 features_max = 200
 
-
+#variables for timer thread
 st = px.Selfstate()
-feature_capture_state = 0
-feature_number = 0
 msec_cnt = 0
-
-
 prev_operatemode = px.PX_HALT
 timer_enabled = False
 timer_busy = False
 has_serious_trouble = False
 
 
-def do_nothing():
-    pass
-
 def timer_tick():
-    global feature_capture_state, feature_number, msec_cnt, prev_operatemode
+    global msec_cnt, prev_operatemode
     global timer_enabled, timer_busy, has_serious_trouble
     global st
-    if not timer_enabled:
-        return
+    if not timer_enabled: return
 
+    #reserve next timer_tick
     timer = Timer(timer_interval_ms * 0.001, timer_tick)
     timer.start()
 
-    if timer_busy:
-        return
+    if timer_busy: return
 
     timer_busy = True
 
     px.set_keepalive()
-    #what is this??
     px.set_systemlog()
 
     px.get_selfstate(st)
@@ -77,29 +67,33 @@ def timer_tick():
             px.set_rangecontrol_z(150.0)
             px.set_operate_mode(px.PX_UP)
 
-    if px.get_battery() == 1:
+    if px.get_battery_is_low():
         has_serious_trouble = True
         timer_enabled = False
 
     timer_busy = False
 
 if __name__ == '__main__':
+    global timer_enabled
+
     try:
-        #You may insert your own code in this try statement
         timer_enabled = True
         timer_tick()
         
+        #You may insert your own code in this try statement
+        feature_capture_state = 0
+        feature_number = 0
+
         #main thread processes image feature
         while timer_enabled:
-            sleep(1)
-        while False: #True:
             if feature_capture_state == 0:
                 if px.get_imgfeature_query(camera_id) == 1:
                     feature_capture_state = 1
             elif feature_capture_state == 1:
                 res = px.get_imgfeature(features_max)
                 if res:
-                    feature_number = len(res)
+                    feature_number = str(len(res))
+                    print("feature point number: " + feature_number)
                     feature_capture_state = 0
             sleep(1)
 
