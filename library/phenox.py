@@ -148,7 +148,7 @@ class SelfState(ctypes.Structure):
         ("battery", ctypes.c_int)
     ]
 
-class ImageFeature(Structure):
+class ImageFeature(ctypes.Structure):
     """ some special color point?? """
 
     _fields_ = [
