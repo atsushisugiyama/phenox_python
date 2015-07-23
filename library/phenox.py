@@ -68,9 +68,9 @@ class PhenoxOperate(ctypes.Structure):
     """ operation variable """
 
     _fields_ = [
-        ("mode", ctypes.ctypes.c_int),
-        ("vision_dtx", ctypes.ctypes.c_float),
-        ("vision_dty", ctypes.ctypes.c_float),
+        ("mode", ctypes.c_int),
+        ("vision_dtx", ctypes.c_float),
+        ("vision_dty", ctypes.c_float),
         ("sonar_dtz", ctypes.c_float),
         ("dangx", ctypes.c_float),
         ("dangy", ctypes.c_float),
@@ -186,7 +186,7 @@ def set_pconfig(param):
     each property values have to be modified carefully for the safety
     """
     if isinstance(param, PhenoxConfig):
-        pxlib.pxset_pconfig(ctypes.ctypes.byref(param))
+        pxlib.pxset_pconfig(ctypes.byref(param))
     else:
         raise ValueError("pxset_pconfig only accepts 'PhenoxConfig'")
 
@@ -203,10 +203,10 @@ def get_pconfig(param=None):
     NOTE: using PhenoxConfig argument fasten the code.
     """
     if isinstance(param, PhenoxConfig):
-        pxlib.pxget_pconfig(ctypes.ctypes.byref(param))
+        pxlib.pxget_pconfig(ctypes.byref(param))
     else:
         result = PhenoxConfig()
-        pxlib.pxget_pconfig(ctypes.ctypes.byref(result))
+        pxlib.pxget_pconfig(ctypes.byref(result))
         return result
 
 def get_selfstate(state=None):
