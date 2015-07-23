@@ -386,7 +386,7 @@ def set_imgfeature_query(cameraId):
     else:
         return False
 
-def set_imgfeature(maxnum, feature=None):
+def get_imgfeature(maxnum, feature=None):
     """set image feature.
     
     maxnum : int
@@ -497,9 +497,15 @@ def get_sound(recordtime, restype='str'):
         buffer = (ctypes.c_short * size)()
         result = pxlib.pxget_sound(buffer, ctypes.c_float(recordtime))
         if result == 1:
-            return (result, list(buffer))
+            if restype == 'list':
+                return list(buffer)
+            else:
+                return "".join(struct.pack('h', v) for v in buffer)
         else:
-            return (result, [])
+            if restype == 'list':
+                return []
+            else:
+                return ""
     else:
         raise ValueError("get_sound only accepts 'float'")
 

@@ -13,7 +13,7 @@ timer_interval_ms = 10
 features_max = 200
 
 #variables for timer thread
-st = px.Selfstate()
+st = px.SelfState()
 msec_cnt = 0
 prev_operatemode = px.PX_HALT
 timer_enabled = False
@@ -87,7 +87,7 @@ if __name__ == '__main__':
         #main thread processes image feature
         while timer_enabled:
             if feature_capture_state == 0:
-                if px.get_imgfeature_query(camera_id) == 1:
+                if px.set_imgfeature_query(camera_id):
                     feature_capture_state = 1
             elif feature_capture_state == 1:
                 res = px.get_imgfeature(features_max)
