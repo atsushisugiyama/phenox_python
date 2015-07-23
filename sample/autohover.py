@@ -95,20 +95,16 @@ if __name__ == '__main__':
                     feature_number = str(len(res))
                     print("feature point number: " + feature_number)
                     feature_capture_state = 0
-            sleep(1)
+            time.sleep(1)
 
-    except Exception as error:
-        print(error)
     #what kind of error will be occur? 
     # -> the most likely one is KeyboardInterrupt.
+    except Exception as error:
+        print(error)
 
-    #you should check whether "close_chain" call is really needed.
-    #(possible issue is:
-    #"close_chain" -> Garbage Collection -> Segmentation Fault)
     finally:
         timer_enabled = False
         px.set_operate_mode(px.PX_HALT)
-        #px.close_chain()
         if has_serious_trouble:
             os.system("umount /mnt\n")
             os.system("shutdown -h now\n")

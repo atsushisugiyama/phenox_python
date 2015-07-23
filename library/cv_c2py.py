@@ -79,16 +79,6 @@ def ipl2iplimage(ipl_ptr, img_shape):
     cv2.cv.SetData(cv_img, str_data, iplimage.widthStep)
     return cv_img
 
-def ipl2cvmat(ipl_ptr, img_shape):
-    """get cv2.cv.cvmat from C's IplImage*
-
-    ipl_ptr: POINTER(IplImage) that points to valid image
-    img_shape: 3 element int tuple (height, width, n_channels)
-    """
-    cv_img = ipl2iplimage(ipl_ptr, img_shape)
-    # building a CvMat image by slice operation([:,:])
-    return cv_img[:, :]
-
 def ipl2array(ipl_ptr, img_shape):
     """get numpy.ndarray from IplImage*
 

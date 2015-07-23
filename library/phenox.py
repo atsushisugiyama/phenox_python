@@ -336,29 +336,25 @@ def get_image(cameraId, restype='iplimage'):
 
     argument means:
         cameraId: phenox.PX_FRONT_CAM or phenox.PX_BOTTOM_CAM
-        restype: result images's type from 3 choices below
+        restype: result images's type from 2 choices below
             'iplimage' -> cv2.cv.iplimage
-            'cvmat'    -> cv2.cv.cvmat
             'ndarray'  -> numpy.ndarray
             NOTE: invalid option is treated same as 'iplimage'
 
     return: 
-        succeed to get image -> image data(iplimage, cvmat or ndarray)
-        failed to get image  -> None
+        if succeed to get image -> image data(iplimage or ndarray)
+        if failed to get image  -> None
     """
     if not (cameraId == PX_FRONT_CAM or cameraId == PX_BOTTOM_CAM):
-        raise ValueError(
-            "cameraId must be phenox.PX_FRONT_CAM or phenox.PX_BOTTOM_CAM"
-            )
+        raise ValueError("cameraId must be PX_FRONT_CAM or PX_BOTTOM_CAM")
 
     img_ptr = POINTER(cv_c2py.IplImage)()
     result = pxlib.pxget_imgfullwcheck(cameraId, ctypes.byref(img_ptr))
+
     if result != 1:
         return None
-
-    if restype == 'cvmat':
-        return cv_c2py.ipl2cvmat(img_ptr, PX_CAM_DATA_SHAPE)
-    elif restype == 'ndarray':
+    
+    if restype == 'ndarray':
         return cv_c2py.ipl2array(img_ptr, PX_CAM_DATA_SHAPE)
     else:
         return cv_c2py.ipl2iplimage(img_ptr, PX_CAM_DATA_SHAPE)
@@ -371,7 +367,7 @@ def set_img_seq(cameraId):
     """
     if not (cameraId == PX_FRONT_CAM or cameraId == PX_BOTTOM_CAM):
         raise ValueError(
-            "cameraId must be phenox.PX_FRONT_CAM or phenox.PX_BOTTOM_CAM"
+            "cameraId must be PX_FRONT_CAM or PX_BOTTOM_CAM"
             )
 
     pxlib.pxset_img_seq(cameraId);
@@ -380,33 +376,43 @@ def set_img_seq(cameraId):
 def set_imgfeature_query(cameraId):
     if not (cameraId == PX_FRONT_CAM or cameraId == PX_BOTTOM_CAM):
         raise ValueError(
-            "cameraId must be phenox.PX_FRONT_CAM or phenox.PX_BOTTOM_CAM"
+            "cameraId must be PX_FRONT_CAM or PX_BOTTOM_CAM"
             )
 
-    return pxlib.pxset_imgfeature_query(cameraId);
+    result = pxlib.pxset_imgfeature_query(cameraId);
+    if result == 1:
+        return True
+    else:
+        return False
 
 def set_imgfeature(maxnum, feature=None):
     """set image feature.
     
     maxnum : int
-    feature : None or px_imgfeature instance.
+    feature : None or ImageFeature instance.
     
-    if feature is None or not px_feature, return value is 2 item tuple.
-        (result(int) from pxlib.so), (img_feature_instance))
+    if feature is (ImageFeature * maxnum) array, then
+        feature is overwritten and return the number of detected feature point.
+        the case failed to obtain feature (because of busy) return -1
 
-    if feature is px_feature, return value is only
-        result(int) from pxlib.so
-    and feature will be overwritten.
+    else, return value is:
+        if succeed  : list(ImageFeature)
+        else        : None
+    in success case, length of the list is trimmed to valid data length, so
+    the number of detected feature points is equal to len(result)
     """
     if not isinstance(maxnum, int):
         raise ValueError("set_imgfeature only accepts 'int[, px_imgfeature]')")
 
-    if isinstance(feature, ImageFeature):
-        return pxlib.pxget_imgfeature(ctypes.byref(feature), maxnum)
+    if isinstance(feature, ImageFeature * maxnum):
+        return pxlib.pxget_imgfeature(feature, maxnum)
     else:
         ft = (ImageFeature * maxnum)()
-        result = pxlib.pxget_imgfeature(ctypes.byref(ft), maxnum)
-        return result, ft
+        res = pxlib.pxget_imgfeature(ft, maxnum)
+        if res == -1:
+            return None
+        else:
+            return list(ft)[:res]
 
 #3-c. image color blob
 def set_blobmark_query(cameraId, min_y, max_y, min_u, max_u, min_v, max_v):
@@ -419,7 +425,7 @@ def set_blobmark_query(cameraId, min_y, max_y, min_u, max_u, min_v, max_v):
         isinstance(min_v, float) and 
         isinstance(max_v, float)
         ):
-        return pxlib.pxset_blobmark(
+        res = pxlib.pxset_blobmark(
             cameraId, 
             ctypes.c_float(min_y),
             ctypes.c_float(max_y),
@@ -428,6 +434,10 @@ def set_blobmark_query(cameraId, min_y, max_y, min_u, max_u, min_v, max_v):
             ctypes.c_float(min_v),
             ctypes.c_float(max_v)
         )
+        if res == 1:
+            return True
+        else:
+            return False
     else:
         raise TypeError("set_blobmark_query received incorrect type arguments.")
 
@@ -439,7 +449,10 @@ def get_blobmark():
         ctypes.byref(y), 
         ctypes.byref(size)
         )
-    return (result, x.value, y.value, size.value)
+    if result == 1:
+        return (True, x.value, y.value, size.value)
+    else:
+        return (False, x.value, y.value, size.value)
 
 #4. sound processing
 def get_whistle_is_detected():
@@ -492,15 +505,13 @@ def get_sound(recordtime):
 def set_led(led, state):
     """set led state.
 
-    led: select LED (use phenox.PX_LED_RED or phenox.PX_LED_GREEN)
+    led: select LED (phenox.PX_LED_RED or phenox.PX_LED_GREEN)
     state: 
         True -> LED ON
         False -> LED OFF
     """
     if not (led == PX_LED_RED or led == PX_LED_GREEN):
-        raise ValueError(
-            "led must be phenox.PX_LED_RED or phenox.PX_LED_GREEN"
-            )
+        raise ValueError("led must be PX_LED_RED or PX_LED_GREEN")
 
     pxlib.pxset_led(led, int(bool(state)))
 
