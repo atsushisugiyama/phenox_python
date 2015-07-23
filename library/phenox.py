@@ -23,6 +23,7 @@ angle: degree
 """
 
 #changed from "from ctypes import *" for the clean namespaces
+import struct
 import ctypes
 
 #this module is used to transform IplImage* to python types
@@ -477,17 +478,19 @@ def set_sound_recordquery(recordtime):
     else:
         raise ValueError("set_sound_recordquery only accepts 'float'")
 
-def get_sound(recordtime):
+def get_sound(recordtime, restype='str'):
     """get raw sound file.
 
     recordtime should be expressed with second.
-    result is tuple of (int, list(int))
-    1st value:
-        1: succeed to get sound
-        -1: failed to get sound
-    2nd value:
-        (if 1st value == 1): sound data
-        (if 1st value == -1): empty list(= [])
+    restype must be 'str' or 'list'.
+
+    returns:
+        if succeed to get sound data: 
+            if restype == 'list' -> raw sound value list
+            if restype == 'str' -> binary str filled with raw sound data
+        if failed to get sound data (by busy or other reasons):
+            if restype == 'list' -> empty list(= [])
+            if restype == 'str' -> empty str("")
     """
     if isinstance(recordtime, float):
         size = int(recordtime * 10000)
@@ -499,6 +502,7 @@ def get_sound(recordtime):
             return (result, [])
     else:
         raise ValueError("get_sound only accepts 'float'")
+
 
 
 #5. logger and indicator
