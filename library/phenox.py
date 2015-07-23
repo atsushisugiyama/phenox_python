@@ -348,7 +348,7 @@ def get_image(cameraId, restype='iplimage'):
     if not (cameraId == PX_FRONT_CAM or cameraId == PX_BOTTOM_CAM):
         raise ValueError("cameraId must be PX_FRONT_CAM or PX_BOTTOM_CAM")
 
-    img_ptr = POINTER(cv_c2py.IplImage)()
+    img_ptr = ctypes.POINTER(cv_c2py.IplImage)()
     result = pxlib.pxget_imgfullwcheck(cameraId, ctypes.byref(img_ptr))
 
     if result != 1:

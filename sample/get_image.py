@@ -24,7 +24,7 @@ if __name__ == "__main__":
     t.start()
 
     print("wait for preparing image buffer...")
-    #time.sleep(1.0)
+    time.sleep(1.0)
     counter_getimage = 0
 
     #Pattern 1: get image as 'cv2.cv.iplimage' type variable
